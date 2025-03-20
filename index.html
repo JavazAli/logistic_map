@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logistic Map Chaos Visualizer</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; }
+        h1 { color: #333; }
+        #container { max-width: 600px; margin: auto; }
+        input { margin: 5px; padding: 5px; }
+        button { padding: 10px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background: #45a049; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>Welcome to the Logistic Map Chaos Visualizer!</h1>
+        <p>This tool demonstrates how population evolves over time based on the logistic map equation:</p>
+        <p><strong>y[n+1] = r * y[n] * (1 - y[n])</strong></p>
+        <p>Input parameters to observe how small changes lead to drastically different outcomes — a core concept in chaos theory.</p>
+	<p>For example test R=4 and initial values 0.2 and 0.20000000001</p>
+
+        <label for="numDiagrams">How many diagrams would you like to generate? (1 or 2):</label>
+        <input type="number" id="numDiagrams" min="1" max="2" value="1"><br>
+
+        <div id="inputs1">
+            <h3>First Diagram:</h3>
+            <label for="r1">Enter r value:</label>
+            <input type="number" step="0.01" id="r1" value="3.5"><br>
+            <label for="y0_1">Enter initial population:</label>
+            <input type="number" step="0.01" id="y0_1" value="0.2"><br>
+        </div>
+
+        <div id="inputs2" style="display:none">
+            <h3>Second Diagram:</h3>
+            <label for="r2">Enter second r value:</label>
+            <input type="number" step="0.01" id="r2" value="3.7"><br>
+            <label for="y0_2">Enter second initial population:</label>
+            <input type="number" step="0.01" id="y0_2" value="0.4"><br>
+        </div>
+
+        <button onclick="generateDiagrams()">Generate Diagrams</button>
+        <div id="plot"></div>
+    </div>
+
+    <script>
+        document.getElementById('numDiagrams').addEventListener('change', function() {
+            const value = parseInt(this.value);
+            document.getElementById('inputs2').style.display = (value === 2) ? 'block' : 'none';
+        });
+
+        function logisticMap(r, y0, steps = 100) {
+            let y = [y0];
+            let x = Array.from({ length: steps + 1 }, (_, i) => i);
+            for (let i = 0; i < steps; i++) {
+                y.push(r * y[i] * (1 - y[i]));
+            }
+            return { x, y };
+        }
+
+        function generateDiagrams() {
+            const numDiagrams = parseInt(document.getElementById('numDiagrams').value);
+            const r1 = parseFloat(document.getElementById('r1').value);
+            const y0_1 = parseFloat(document.getElementById('y0_1').value);
+
+            const data = [];
+            const firstData = logisticMap(r1, y0_1);
+            data.push({
+                x: firstData.x,
+                y: firstData.y,
+                type: 'scatter',
+                mode: 'lines',
+                line: { color: 'blue' },
+                name: `r=${r1}, y0=${y0_1}`
+            });
+
+            if (numDiagrams === 2) {
+                const r2 = parseFloat(document.getElementById('r2').value);
+                const y0_2 = parseFloat(document.getElementById('y0_2').value);
+                const secondData = logisticMap(r2, y0_2);
+                data.push({
+                    x: secondData.x,
+                    y: secondData.y,
+                    type: 'scatter',
+                    mode: 'lines',
+                    line: { color: 'red' },
+                    name: `r=${r2}, y0=${y0_2}`
+                });
+            }
+
+            Plotly.newPlot('plot', data, {
+                title: 'Logistic Map Chaos Diagrams',
+                xaxis: { title: 'Time (steps)' },
+                yaxis: { title: 'Population (fraction of max)' }
+            });
+        }
+    </script>
+</body>
+</html>
